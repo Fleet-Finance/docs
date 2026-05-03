@@ -1,0 +1,102 @@
+---
+title: "Capital Structure"
+description: "How the pool is organised — treasury-backed yield-bearing tokens as the reserve asset, the 80/20 split, and the Insurance Fund."
+---
+
+## Yield-Bearing Tokens as the Reserve Asset
+
+All capital in the Fleets pool is held in **treasury-backed yield-bearing tokens**. Unlike a ```$1.00``` pegged stablecoin, these tokens' price rises continuously as the underlying Treasury yield is reflected through an increasing exchange rate (currently ~3–5% APY).
+
+This has a direct consequence for the protocol: the pool earns baseline yield **even with no active loans**. Every yield-bearing token held in the pool — whether in the liquidity reserve or undeployed capital — is appreciating in dollar terms every second. This yield is already reflected in the pool value in real time.
+
+On-chain, the protocol stores only the **yield-bearing token quantity** (`c_tokens`), never a fixed USD value. The dollar value is computed live from the oracle:
+
+```
+C_usd(t) = c_tokens × token_price(t)
+```
+
+This means the pool's USD value is always accurate and always current.
+
+## The 80/20 Structure
+
+Every dollar deposited into the pool is split into two buckets:
+
+```
+Total Pool (100%)
+├── Liquidity Reserve (20%) ──► Always in yield-bearing tokens
+│                                   Never lent to operators
+│                                   Available for redemptions
+│
+└── Loan Allocation (80%)
+         ├── Active Loan Book ──► Fleet operators 
+         └── Undeployed Capital ──► In yield-bearing tokens while awaiting deployment
+```
+
+### Liquidity Reserve (20%)
+
+The liquidity reserve is a hard floor for loan origination. It is ring-fenced — capital in the reserve cannot be allocated to fleet loans. Its purpose is to ensure that redemptions can be processed without requiring loan recalls.
+
+- Always held in yield-bearing tokens (earning passive yield)
+- Replenished first when amortised principal returns from loan repayments
+- If the reserve falls below 20%, the protocol cannot originate new loans until it is restored above that threshold
+- Redemptions remain available even when the reserve is below 20%
+
+### Loan Allocation (80%)
+
+The loan allocation is the deployable capital. Up to 100% of this 80% bucket can be drawn into active fleet facilities. Capital in this bucket that is not yet lent (**Undeployed Capital**) remains in yield-bearing tokens earning passive yield.
+
+As operators repay their loans, principal flows back into the Undeployed Capital bucket. The liquidity reserve is topped up first if it has fallen below 20%, then the remainder stays as Undeployed Capital available for new originations.
+
+## The Insurance Fund (Credit Enhancement Reserve)
+
+The Insurance Fund is the **second line of defence** against credit losses, after the FFC tranche. It is funded from two sources:
+
+1. **5% of gross yield** each distribution epoch, minted as FYC tokens
+2. **50% of accelerated redemption fees** paid by depositors who exit before their scheduled queue
+
+The Insurance Fund holds value in the form of FYC tokens. When a loan defaults and FFC is unable to fully cover the remaining loss, the Insurance Fund is activated — FYC tokens held in the insurance wallet are burned, reducing the FYC supply and stabilising the FYC price per token.
+
+Only when both the FFC tranche and the Insurance Fund are fully exhausted would FYC holders experience a loss.
+
+## Pool Value Formula
+
+The pool's total value at any moment is:
+
+```
+V_pool = C_usd + OP
+```
+
+| Term | Description |
+|---|---|
+| **C_usd** | Dollar value of yield-bearing token holdings: `c_tokens × token_price(t)` — current, not historical |
+| **OP** | Outstanding principal — sum of active loan balances, reduced by every repayment and zeroed when a loan closes |
+
+When a loan defaults, the defaulted loan is removed from OP and any vehicle auction proceeds are returned to C_usd. The net loss from that default is absorbed directly into V_FFC (and, if needed, through insurance token burns into FYC supply). Because C_usd and OP are both live values — not cumulative historical figures — their sum always gives the accurate current pool value. 
+
+## Tranche Value Split
+
+The total pool value is split between the two tranches. At any point:
+
+```
+V_pool = V_FYC + V_FFC
+```
+
+The split between FYC and FFC is entirely determined by user participation — how much capital each set of depositors has contributed. There is no fixed target ratio between the tranches.
+
+## Key Protocol Parameters
+
+| Parameter | Value | Notes |
+|---|---|---|
+| Liquidity Reserve | 20% of pool NAV | Hard floor for new loan origination |
+| Max Loan Deployment | 100% of Loan Allocation | Up to 80% of total pool |
+| FFC Coverage Ratio (φ) | ≥ 80% of active loans | Hard invariant, enforced at contract level |
+| Protocol Fee | 10% of gross yield | Minted as FYC into protocol wallet |
+| Insurance Fund Allocation | 5% of gross yield | Minted as FYC into insurance wallet |
+| Net Yield to LPs | 85% of gross yield | After fees and Insurance Fund |
+| Base Yield (yield-bearing tokens) | ~3–5% APY | Baseline for all idle capital |
+| Grace Period | 30 days | After missed repayment, before default |
+| Penalty Rate | APR × 1.25 | Applied to monthly interest during grace period |
+
+<Note>
+  Continue to [Yield Model](/protocol-overview/yield-model) to understand how these parameters combine to generate returns for FYC and FFC holders.
+</Note>

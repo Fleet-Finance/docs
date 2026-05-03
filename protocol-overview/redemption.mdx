@@ -1,0 +1,119 @@
+---
+title: "Redemption"
+description: "How to exit your position — scheduled redemption (no fee) vs accelerated redemption (small fee)."
+---
+
+## Two Ways to Exit
+
+FYC and FFC holders can exit their positions in two ways:
+
+| | Scheduled Redemption | Accelerated Redemption |
+|---|---|---|
+| **Fee** | None | Dynamic fee (see below) |
+| **Wait time — FYC** | 30-day queue | Immediate |
+| **Wait time — FFC** | 90-day queue | Immediate |
+| **Price used** | Conservative price at settlement | Conservative price at request |
+| **Queue order** | First-come, first-served by timestamp | Instant — subject to liquidity |
+
+## Scheduled Redemption (No Fee)
+
+Scheduled redemption joins a time-ordered queue. Requests are processed first-come, first-served as liquidity becomes available from the Liquidity Reserve.
+
+- **FYC holders** wait up to **30 days**
+- **FFC holders** wait up to **90 days**
+
+During the wait, your tokens continue to accrete yield normally — you lose nothing by queuing rather than accelerating.
+
+Redemption is settled at the **conservative price** on the day the queue processes your request. The conservative price reflects only confirmed, collected income.
+
+## Accelerated Redemption (Dynamic Fee)
+
+Accelerated redemption is immediate. You receive USDC at the current conservative price minus a small fee. The fee is dynamic — it depends on how large your redemption is relative to the tranche's **Effective Liquidity Base (ELB)**.
+
+### Effective Liquidity Base
+
+The Effective Liquidity Base (ELB) is the total liquid capital available to process redemptions without recalling active loans.
+
+In practice, ELB represents all capital currently available in the pool. This includes the liquidity reserve and any undeployed capital that has not been allocated to active loans.
+
+```text
+Total ELB = Liquidity Reserve + Undeployed Capital
+```
+
+The total ELB is shared across tranches based on their relative ownership of the pool.
+
+```text
+FYC ELB = Total ELB × (FYC NAV / Pool NAV)
+
+FFC ELB = Total ELB × (FFC NAV / Pool NAV)
+```
+
+This means each tranche’s available liquidity is simply its proportional share of the total liquid capital in the system.
+
+The key insight is that undeployed capital is also instantly accessible. When a larger portion of the pool is undeployed, the ELB increases, making redemptions easier and reducing redemption pressure. When more capital is deployed into active loans, the ELB decreases, which tightens available liquidity.
+
+As a result, redemption dynamics naturally adjust based on pool utilization:
+- Higher undeployed capital → higher ELB → lower redemption pressure  
+- Higher loan deployment → lower ELB → tighter liquidity conditions  
+
+### Fee Formulae
+
+Accelerated redemption fees are based on how much liquidity a redemption consumes relative to the tranche’s share of the Effective Liquidity Base (ELB).
+
+```text
+FYC Fee Rate = 0.10% + (Redemption Amount / FYC ELB) × 0.40%
+Min: 0.10%   Max: 0.50%
+
+FFC Fee Rate = 0.50% + (Redemption Amount / FFC ELB) × 0.50%
+Min: 0.50%   Max: 1.00%
+```
+
+This means fees dynamically adjust based on available liquidity. When liquidity is high, fees are lower. When liquidity is constrained, fees increase.
+
+---
+
+### Examples
+
+#### FYC redemption — 75% deployment
+
+| Parameter | Value |
+|---|---:|
+| Total ELB | `$200,000` |
+| FYC Share  | `80%` |
+| FYC ELB | `$160,000` |
+| Redemption Amount | `$30,000` |
+| Fee Rate | `0.10% + (18.75% × 0.40%) = 0.175%` |
+| Fee Paid | `$52.50` |
+
+---
+
+#### FYC redemption — 0% deployment (no active loans)
+
+| Parameter | Value |
+|---|---:|
+| Total ELB | `$800,000` |
+| FYC Share | `80%` |
+| FYC ELB | `$640,000` |
+| Redemption Amount | `$30,000` |
+| Fee Rate | `0.10% + (4.69% × 0.40%) = 0.119%` |
+| Fee Paid | `$35.70` |
+
+Accelerated redemption fees are split evenly: **50% to the protocol treasury** and **50% to the Insurance Fund**.
+
+The redemption value for each tranche is based on the tranche's share of the total pool value at the time of redemption.
+
+## Redemptions and the Liquidity Floor
+
+Redemptions are always processed regardless of whether the Liquidity Reserve is above or below the 20% floor. However, if the floor is below 20%, the protocol cannot originate new loans until it has been restored above that threshold.
+
+## FFC Special Rule: Coverage Constraint
+
+FFC redemptions — both scheduled and accelerated — are subject to an additional check. After the redemption, the FFC coverage ratio must still satisfy:
+
+```
+φ = V_FFC / Active Loans ≥ 0.80
+```
+
+If a large FFC redemption would breach this ratio, the redemption is reduced to the maximum amount that keeps φ above 0.80.
+
+This prevents FFC holders from exiting in a way that would leave FYC holders under-protected.

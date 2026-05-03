@@ -1,4 +1,99 @@
 ---
-title: "Buy / Stake"
-description: "This document provides an accessible overview of our products, with enough detail on the protocol to meet the needs of both web3 and non-web3 users."
+title: "Deposit & Mint"
+description: "How depositing USDC mints FYC or FFC tranche tokens — the full deposit flow."
 ---
+
+## Overview
+
+Depositing into Fleets is a single transaction: you send USDC and receive FYC (senior) or FFC (junior) tranche tokens. Under the hood, the protocol converts your USDC to treasury-backed yield-bearing tokens, prices your deposit at the current optimistic tranche price, mints your tokens, and returns any swap slippage as dust.
+
+## Choosing Your Tranche
+
+Before depositing, decide which tranche fits your risk profile:
+
+<Columns cols={2}>
+  <Card title="FYC — Senior Tranche" icon="shield">
+    **Lower risk. Capped but predictable yield.**
+
+    - Receives yield first each epoch up to the sliding cap
+    - Last to absorb any credit losses
+    - Token price accretes steadily over time
+    - Best for depositors who want stable, real-world income
+  </Card>
+  <Card title="FFC — Junior Tranche" icon="bolt">
+    **Higher risk. Uncapped residual yield.**
+
+    - Receives all yield above the FYC cap
+    - First to absorb credit losses
+    - Token price more volatile — high upside, real downside
+    - Best for depositors who want maximised returns and accept first-loss exposure
+  </Card>
+</Columns>
+
+<Warning>
+  FFC is a first-loss instrument. In default scenarios, FFC token holders may see their token value decline. Only deposit into FFC if you understand and accept this risk.
+</Warning>
+
+## The Deposit Flow
+
+<Steps>
+  <Step title="Connect Your Wallet">
+    Connect a Solana-compatible wallet (Phantom, Backpack, Solflare) to the Fleets app. Ensure you hold sufficient USDC and SOL for transaction fees.
+  </Step>
+  <Step title="Select Tranche and Amount">
+    Choose FYC or FFC and enter the USDC amount you wish to deposit. The UI will display the current token price and the estimated number of tokens you will receive.
+  </Step>
+  <Step title="Set Slippage Tolerance">
+    The protocol swaps your USDC to yield-bearing tokens via an on-chain DEX. Set your slippage tolerance (default: 0.5%). Any yield-bearing tokens received above the floor implied by your slippage setting are returned to you as dust — you are never over-charged.
+  </Step>
+  <Step title="USDC Depeg Check">
+    Before executing, the protocol reads the USDC/USD price oracle. If USDC is trading below ```$0.995```, the deposit is rejected to protect the pool from a depegging event. This check runs twice — before and during the swap.
+  </Step>
+  <Step title="Swap and Mint">
+    The protocol swaps your USDC for yield-bearing tokens and mints your FYC or FFC tokens at the **optimistic price** (current tranche value including accrued but not yet received loan interest). Tokens are delivered to your wallet in the same transaction.
+  </Step>
+</Steps>
+
+## Tokens Minted Formula
+
+```
+Tokens minted = Deposit Amount / P_optimistic
+```
+
+**Example:** If you deposit ```$10,000``` USDC and `P_FYC = $1.04`, you receive:
+
+```
+$10,000 / $1.04 = 9,615 FYC tokens
+```
+
+If you later redeem at `P_FYC = $1.12`:
+
+```
+9,615 × $1.12 = $10,769  (gain of $769)
+```
+
+## Why the Optimistic Price?
+
+Deposits use the **optimistic** price rather than the conservative price. This prevents dilution of existing holders: a new depositor paying only the conservative price would effectively receive a share of loan interest that existing holders already earned.
+
+The optimistic price is calculated on-chain at the moment of your deposit. It accounts for:
+1. Accrued loan interest since the last repayment for each active facility — interest earned by the pool based on time elapsed, but not yet received from borrowers
+
+Yield from treasury-backed yield-bearing tokens does not need to be estimated — it is already reflected directly in the pool value and therefore in the conservative price.
+
+The optimistic price is used only for minting. It is not displayed in the UI. The UI always shows the conservative price, and redemptions are also settled at the conservative price.
+
+## After Depositing
+
+Once you hold FYC or FFC tokens:
+- Your token price **accretes automatically** as yield accumulates — you do not need to claim or stake further
+- You can view your token price and estimated NAV in the Fleets app at any time
+- When ready to exit, you can initiate a **Scheduled Redemption** (no fee) or **Accelerated Redemption** (small fee) — see [Redemption](/protocol-overview/redemption)
+
+<Info>
+  FYC and FFC tokens are SPL tokens on Solana. They can be held in any compatible wallet and transferred freely, though secondary market liquidity is subject to availability.
+</Info>
+
+<Note>
+  For a full walkthrough of the depositor experience from first deposit to redemption, see [Getting Started for Depositors](/depositors/getting-started).
+</Note>

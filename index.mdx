@@ -1,7 +1,20 @@
 ---
 title: "Introduction"
-description: "This document provides an accessible overview of our products, with enough detail on the protocol to meet the needs of both web3 and non-web3 users."
+description: "This documentation offers a comprehensive overview of our products, providing clear insights into the underlying protocol."
 ---
+
+<img 
+  className="block dark:hidden" 
+  src="/images/how-it-works.png" 
+  alt="Light mode interface"
+/>
+
+
+<img 
+  className="hidden dark:block" 
+  src="/images/how-it-works-dark.png" 
+  alt="Dark mode interface"
+/>
 
 <Info>
 
@@ -11,27 +24,36 @@ description: "This document provides an accessible overview of our products, wit
 
 ## What is Fleets?
 
-Fleets is a Solana-native structured lending protocol that channels DeFi liquidity into African
-corporate fleet financing.
+Fleets is a structured credit protocol that connects DeFi capital to real-world transportation infrastructure across Africa. The protocol enables fleet operators to access financing for vehicle acquisition, with the underlying fleets serving as collateral and generating income through their use in public and private transportation networks. Capital is deployed through onchain credit instruments, giving depositors transparent exposure to income-producing mobility assets.
+
+Loans are structured on an amortized basis, allowing operators to meet repayment obligations through a combination of fleet-generated cashflows and external income when necessary.
+
+This creates a resilient system where **borrowers** can reliably scale their operations, while **depositors** earn yield derived from the real economic activity of transportation. Because these returns are driven by consistent mobility demand rather than market speculation, they remain structurally independent of crypto market cycles.
 
 
 
 <Columns cols={2}>
   <Card
-    title="fUSD"
-    icon="dollar-circle"
-    href="/development"
+    title="Borrowers"
+    icon="hand-holding-dollar"
+    href="/borrowers/operator-journey"
   >
-    A synthetic dollar fully backed by top tier stablecoins.
+    Fleet operators seeking structured financing for vehicle acquisition to expand their fleet capacity.
   </Card>
   <Card
-    title="sfUSD"
-    icon="circle-dollar-to-slot"
-    href="/essentials/settings"
+    title="Depositors"
+    icon="coins"
+    href="/depositors/getting-started"
   >
-    Yield-bearing token *(Staked version of fUSD)*.
+    DeFi participants looking for uncorrelated, yield-bearing exposure to real-world assets.
   </Card>
 </Columns>
+
+## How the Protocol Works?
+
+Fleet operators access the protocol by applying for financing facilities secured by their bus fleets and the cashflows those assets generate. Each application is evaluated at the asset level, with eligibility criteria and loan-to-value parameters defined by the protocol. Once approved, capital is deployed to fund vehicle acquisition, enabling operators to scale their fleets while maintaining predictable repayment structures through amortized loans.
+
+On the other side, depositors supply stablecoins into the protocol to mint one of two tranche tokens, each representing a different risk-return profile. FYC is the senior tranche, providing exposure to yield generated from asset-backed fleet loans and treasury-backed yield-bearing tokens. FFC, the junior tranche, absorbs first-loss risk in the event of defaults and, in return, offers a higher yield. Together, these tranches form a structured system that aligns risk distribution while giving depositors transparent access to real-world, income-generating assets.
 
 ## Get Started
 
@@ -40,29 +62,29 @@ Choose your path to explore our documentation:
 <Columns cols={2}>
   <Card
     title="Why Fleets?"
-    icon="question-circle"
-    href="/essentials/markdown"
+    icon="circle-question"
+    href="/background/traditional-fleet-financing"
   >
     Understand the limitations of traditional vehicle financing and why Fleets exists.
   </Card>
   <Card
     title="How it Works"
-    icon="cog"
-    href="/essentials/code"
+    icon="gear"
+    href="/protocol-overview/how-it-works"
   >
-    Discover how Fleets addresses the vehicle financing gap in Africa.
+    Discover how Fleets structures capital to fund real-world transportation assets.
   </Card>
   <Card
-    title="Mint fUSD/sfUSD"
-    icon="image"
-    href="/essentials/images"
+    title="Deposit & Earn"
+    icon="arrow-right-to-bracket"
+    href="/depositors/getting-started"
   >
-    Begin investing in fractional ownership of buses on Fleets.
+    Deposit USDC and mint FYC or FFC tokens to start earning real-world yield.
   </Card>
   <Card
-    title="Read FAQs" 
-    icon="info-circle"
-    href="/essentials/reusable-snippets"
+    title="Read FAQs"
+    icon="circle-info"
+    href="/resources/faq"
   >
     Get answers to frequently asked questions about Fleets.
   </Card>

@@ -1,0 +1,148 @@
+---
+title: "Yield Model"
+description: "Where yield comes from, how it flows through the waterfall, and what FYC and FFC holders actually earn."
+---
+
+## Two Sources of Yield
+
+The protocol generates income from two independent sources:
+
+<Columns cols={2}>
+  <Card title="Fleet Loan Income" icon="handshake">
+    Monthly repayments from fleet operators. Recognised **cash-basis** — only when USDC lands in the pool. Earns competitive APR on outstanding principal. When a repayment arrives, only the interest portion increases pool value; the principal portion reduces the outstanding loan balance.
+  </Card>
+  <Card title="Yield-Bearing Token Returns" icon="arrow-trend-up">
+    Continuous price appreciation of treasury-backed yield-bearing tokens held in the pool. Accrues every second on the Liquidity Reserve, Undeployed Capital, and any principal returned from loans. Already reflected in pool value in real time.
+  </Card>
+</Columns>
+
+## Yield Mechanics by Source
+
+**Yield-bearing token returns** accrue continuously and are reflected directly in the pool's total value every second. The LP share of this growth (85%) is already embedded in the growing pool value — there is no separate act of distributing it to token holders. Conceptually, 15% of the accumulating gain is set aside for the protocol fee and insurance fund as it accrues, but this is a mental accounting model. The on-chain action happens at each distribution epoch.
+
+**Distribution epochs** (typically every 2–3 days) are the on-chain event where the protocol mints FYC tokens equivalent to the accumulated protocol fee (10%) and insurance fund (5%) since the last epoch. This minting is price-neutral — new FYC is issued at the current price so that the fee capture does not dilute existing holders. The 85% LP portion requires no separate action: it is already part of the pool value that FYC and FFC holders have a claim on through their tranche values.
+
+**Loan yield** works differently. The protocol treats loan income as a fixed monthly interest contribution. When a repayment arrives, the interest portion is computed and processed **immediately** — no epoch is needed. The full payment enters the pool, and the interest component is split and credited on the spot.
+
+For example: if a borrower pays ```$5,000``` in a given month and the interest for that period is ```$250```, then ```$250``` flows through the interest waterfall immediately and ```$4,750``` reduces the outstanding loan principal.
+
+## How Each Source Is Processed
+
+**Yield-bearing token returns:**
+
+```
+Continuous pool value growth
+    │
+    └── At each epoch (every 2–3 days):
+            ├── 10% of accumulated gain ──► Protocol Treasury (minted as FYC)
+            ├──  5% of accumulated gain ──► Insurance Fund (minted as FYC)
+            └── 85% ──► Already in pool value — LP tranche claims grow with it
+```
+
+**Loan interest (processed instantly on repayment):**
+
+```
+Interest received
+    │
+    ├── 10% ──► Protocol Treasury (minted as FYC)
+    ├──  5% ──► Insurance Fund (minted as FYC)
+    └── 85% ──► FYC and FFC holders (via sliding cap, immediately)
+```
+
+Both the protocol fee and Insurance Fund allocation are minted as new FYC tokens at the current price, ensuring the minting is price-neutral and does not dilute existing FYC holders.
+
+The 85% loan interest net yield is split between FYC and FFC based on the **sliding cap mechanism**.
+
+## The FYC Sliding Cap
+
+FYC receives yield from loan income first, up to a cap. The cap is not fixed — it slides based on two factors:
+
+1. **Base rate** — derived from the observed yield-bearing token APY. FYC's baseline return tracks what the pool earns from its reserve assets.
+
+2. **Deployment premium** — as more of the Loan Allocation is drawn into active facilities, the cap rises toward the protocol's configured maximum (e.g. 10%). This rewards FYC holders for the credit risk the pool is taking.
+
+```
+Effective Cap = Base_Cap + (Max_Cap − Base_Cap) × Deploy_Ratio
+```
+
+where `Deploy_Ratio = min(Active Loans / Loan Allocation, 1)`.
+
+FFC receives **everything above the FYC cap** as residual yield from loan income.
+
+{/* ## APY Scenarios
+
+The table below shows indicative APY for FYC and FFC across different deployment and rate scenarios, assuming a ```$1,000,000``` pool with 3.5% base yield from yield-bearing tokens and a 2.5% net base APY after fees:
+
+| Scenario | Blended APR | Deployment Rate | Net Base APY (both) | FYC APY | FFC APY |
+|---|---|---|---|---|---|
+| No active loans | — | 0% | ~2.5% | ~2.5% | ~2.5% |
+| Conservative | 18% | 50% | ~2.5% | ~7–8% | ~10% |
+| Base case | 25% | 75% | ~2.5% | ~7–8% | ~50% |
+| Full deployment | 35% | 100% | ~2.5% | ~8–10% | ~100%+ | */}
+
+{/* <Info>
+  FFC yield is highly sensitive to deployment rate and blended APR. A deeply deployed pool with high-APR loans delivers outsized FFC returns because a small junior tranche captures the residual of a large net yield.
+</Info> */}
+
+## When No Loans Are Active
+
+Without an active loan book, only yield-bearing token returns are available. In this scenario, net yield (after the 15% fee and insurance allocation) is distributed proportionally across both tranches based on their share of pool value:
+
+- FYC and FFC earn the **same base APY** — both receive their proportional share of net yield-bearing token returns
+- For example, if net yield-bearing token returns after fees are 2.5% APY, both FYC and FFC earn approximately 2.5% APY
+
+When loans become active, the loan yield component is distributed via the sliding cap mechanism, and FFC begins earning the residual above the FYC cap.
+
+## Default Waterfall
+
+If a loan defaults and the vehicle auction recovery falls short:
+
+<Steps>
+  <Step title="FFC Tranche (First Loss)">
+    The shortfall is charged against the FFC tranche first. FFC token holders' V_FFC decreases, and their token price falls accordingly.
+  </Step>
+  <Step title="Insurance Fund (Second Line of Defence)">
+    If the FFC tranche cannot cover the full loss, the Insurance Fund is activated. FYC tokens held in the insurance wallet are burned, reducing the FYC supply. This stabilises the FYC price per token.
+  </Step>
+  <Step title="FYC Tranche (Final Backstop)">
+    Only if both the FFC tranche and the Insurance Fund are fully exhausted does any loss reach FYC holders. Given the FFC coverage constraint (φ ≥ 80%), this requires losses exceeding the entire junior tranche and insurance reserves — an extreme scenario.
+  </Step>
+</Steps>
+
+<Warning>
+  The FFC coverage constraint (φ ≥ 80%) does not prevent losses — it prevents the protocol from lending so aggressively that a single large default could threaten FYC. FFC holders can and will lose value in default scenarios.
+</Warning>
+
+## Month-by-Month NAV Example
+
+The table below traces NAV for both tranches over a ```$600,000``` facility at 20% APR on a ```$1,000,000``` pool. The example assumes a 50:50 tranche split, with ```$500,000``` of FYC and ```$500,000``` of FFC at genesis.
+
+The facility represents 75% of the ```$800,000``` lendable amount. The remaining ```$400,000``` stays in reserve and earns yield from treasury-backed yield-bearing tokens. The gross yield-bearing token APY is 3.5%, and after the 15% combined protocol and insurance fee, the net APY is 2.975%.
+
+For pool accounting, loan income is treated as fixed monthly interest. A ```$600,000``` facility at 20% APR over 36 months has an estimated monthly repayment of ```$22,288.11```, total interest of ```$202,371.96```, and fixed monthly interest of ```$5,621.44```. The remaining ```$16,666.67``` of each repayment reduces the outstanding principal.
+
+```text
+Deploy_Ratio = min(Active Loans / Loan Allocation, 1)
+
+Loan Allocation = 80% × v_pool
+
+v_pool = Reserve + Outstanding Principal
+
+Effective Cap = Base_Cap + (Max_Cap - Base_Cap) × Deploy_Ratio
+```
+
+| Period | Base Cap | Deploy Ratio | FYC Effective Cap | Fixed Loan Interest | Yield-Bearing Token Yield | Net Monthly Yield | FYC Token Price / APY | FFC Token Price / APY |
+|---|---|---|---|---|---|---|---|---|
+| Genesis | ```2.975%``` | — | — | — | — | — | ```$1.0000``` / — | ```$1.0000``` / — |
+| Month 1 | ```1.19%``` | ```75.00%``` | ```7.80%``` | ```$5,621.44``` | ```$991.67``` | ```$6,613.11``` | ```$1.0055``` / ```6.60%``` | ```$1.0077``` / ```9.24%``` |
+| Month 3 | ```1.31%``` | ```70.11%``` | ```7.40%``` | ```$5,621.44``` | ```$1,099.85``` | ```$6,721.29``` | ```$1.0167``` / ```6.35%``` | ```$1.0235``` / ```9.52%``` |
+| Month 6 | ```1.48%``` | ```62.94%``` | ```6.84%``` | ```$5,621.44``` | ```$1,263.13``` | ```$6,884.57``` | ```$1.0326``` / ```6.00%``` | ```$1.0499``` / ```9.95%``` |
+| Month 12 | ```1.80%``` | ```49.16%``` | ```5.83%``` | ```$5,621.44``` | ```$1,593.36``` | ```$7,214.80``` | ```$1.0612``` / ```5.40%``` | ```$1.1129``` / ```10.60%``` |
+| Month 24 | ```2.41%``` | ```23.93%``` | ```4.22%``` | ```$5,621.44``` | ```$2,268.71``` | ```$7,890.15``` | ```$1.1068``` / ```4.10%``` | ```$1.2659``` / ```11.80%``` |
+| Month 36 | ```2.93%``` | ```1.72%``` | ```3.06%``` | ```$5,621.44``` | ```$2,964.43``` | ```$8,585.87``` | ```$1.1420``` / ```3.00%``` | ```$1.4500``` / ```13.10%``` |
+
+As monthly repayments return to the pool, reserve increases and outstanding principal decreases. This reduces the deploy ratio over time, causing FYC’s effective cap to move closer to the base yield. FYC receives yield up to its effective cap, while the remaining yield accrues to FFC as residual upside.
+
+<Note>
+  Continue to [Loan Mechanics](/protocol-overview/loan-mechanics) for a deep dive into how repayments are structured.
+</Note>

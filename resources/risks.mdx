@@ -1,0 +1,156 @@
+---
+title: "Risks"
+description: "A transparent account of the risks involved in depositing into Fleets — what they are, how the protocol mitigates them, and what remains."
+---
+
+<Warning>
+  Depositing into Fleets involves real financial risk. You may lose some or all of your deposited capital. Read this page carefully before participating.
+</Warning>
+
+## Credit Risk
+
+**The risk that a fleet operator fails to repay their loan.**
+
+This is the primary risk in the protocol. Operators repay from the cashflows of their vehicle fleet. If an operator's business deteriorates — through vehicle damage, loss of contracts, or economic disruption — repayments may stop.
+
+**Mitigations:**
+- All operators are vetted by the licensed SPV before any capital is disbursed
+- Loans are secured by vehicle liens; defaulting operators face asset seizure and auction
+- A 30-day grace period gives operators a window to remedy missed payments before default is declared
+- The FFC tranche absorbs losses first, before the Insurance Fund or FYC capital is touched
+
+**What remains:** No credit assessment is perfect. Auction recoveries on seized vehicles may not cover the full outstanding balance. In a severe or widespread default scenario, FFC holders — and potentially FYC holders — can lose capital.
+
+---
+
+## Tranche Risk (FFC — First Loss)
+
+**The risk specific to FFC holders: losses hit them first.**
+
+FFC is a first-loss instrument. In any default where losses exceed what the vehicle auction recovers, the shortfall is charged directly against the FFC tranche value. FFC token price falls accordingly.
+
+**Mitigations:**
+- The FFC coverage constraint (φ = V_FFC / Active Loans ≥ 80%) limits how much the protocol can lend relative to the size of the junior buffer
+- Origination is blocked if a new loan would breach this ratio
+- FFC redemptions are capped if they would undermine the coverage ratio
+
+**What remains:** FFC holders can and should expect to absorb losses in default scenarios. This is the explicit trade-off for receiving uncapped residual yield.
+
+---
+
+## Liquidity Risk
+
+**The risk of not being able to exit your position when you want to.**
+
+Redemptions are always available, but their processing depends on available liquidity. If redemption demand is large relative to pool liquidity, some requests may be queued.
+
+**Mitigations:**
+- 20% of the pool is always ring-fenced in yield-bearing tokens and never deployed to loans
+- Undeployed Capital (the portion of the 80% Loan Allocation not yet lent) is also instantly accessible and expands the Effective Liquidity Base (ELB) for redemptions
+- Scheduled Redemptions (no fee) are available as a low-cost exit route for patient holders
+
+**What remains:** During periods of high simultaneous redemption demand or full loan deployment, FFC holders in particular may face a 90-day queue. New loan origination is also blocked when the Liquidity Reserve falls below 20%.
+
+---
+
+## Smart Contract Risk
+
+**The risk of bugs or exploits in the on-chain protocol code.**
+
+Fleets is deployed on Solana using the Anchor framework. All pool state, loan accounts, and redemption queues are managed by smart contracts. A vulnerability in the contract code could result in loss of funds.
+
+**Mitigations:**
+- The protocol undergoes security audits before public launch
+- All state is stored in program-derived accounts (PDAs) with explicit authority checks
+- The protocol includes a pause mechanism allowing the team to halt operations in an emergency
+
+**What remains:** No audit eliminates all smart contract risk. Undiscovered vulnerabilities, Solana runtime bugs, or oracle manipulation could affect the protocol.
+
+---
+
+## Oracle Risk
+
+**The risk that price oracles return incorrect data.**
+
+The protocol relies on two oracles: the yield-bearing token price oracle (used to compute pool value and token prices) and the USDC/USD oracle (used for depeg protection). If either oracle is manipulated or returns stale data, token prices could be mispriced, enabling exploitative deposits or redemptions.
+
+**Mitigations:**
+- The USDC depeg check rejects deposits if USDC trades below ```$0.995``` — the oracle is checked twice per deposit (before and during the swap)
+- The yield-bearing token price is fetched directly from the oracle at the point of computation; no stale value is stored on-chain
+
+**What remains:** Oracle failure or manipulation is a systemic risk shared across all DeFi protocols. A sufficiently sophisticated oracle attack could cause material mispricing.
+
+---
+
+## Yield-Bearing Token Counterparty Risk
+
+**The risk that the treasury-backed yield-bearing token fails or is redeemable at a loss.**
+
+All idle capital in the pool is held in treasury-backed yield-bearing tokens backed by short-duration US Treasuries. A failure of the issuer, a regulatory freeze, or a collapse in the underlying Treasury market would directly impact the pool's holdings.
+
+**Mitigations:**
+- The underlying assets are US Treasuries — among the lowest-risk assets in global finance
+- The issuer is a regulated financial institution subject to reserve reporting requirements
+
+**What remains:** Treasury-backed yield-bearing tokens are not FDIC-insured. An extreme regulatory or counterparty event affecting the issuer would affect all capital in the pool, regardless of tranche.
+
+---
+
+## FX and Settlement Risk
+
+**The risk arising from NGN/USD conversion between the pool and the operator.**
+
+Loan facilities are denominated in USD, but operators generate revenue in Nigerian naira (NGN). The SPV handles conversion — but if the naira depreciates sharply or NGN liquidity in USD conversion markets dries up, operators may struggle to service their USD obligations even when their naira cashflows are healthy.
+
+**Mitigations:**
+- The protocol lends in USD and requires repayment in USD — FX risk sits with the operator and the SPV, not directly with the pool
+- Operators with diversified revenue streams (e.g. employer shuttle contracts) tend to have more predictable cashflows
+
+**What remains:** Severe naira depreciation is an indirect credit risk. It raises the effective cost of borrowing for operators and increases the probability of default, even if the protocol itself does not hold naira.
+
+---
+
+## Concentration Risk
+
+**The risk of excessive exposure to a small number of operators or facilities.**
+
+In the early stages of the protocol, the loan book may consist of a small number of large facilities. A single large default could have an outsized impact on pool NAV.
+
+**Mitigations:**
+- The FFC coverage constraint limits total lending relative to the junior buffer size
+- As the protocol scales, loan book diversification across operators reduces individual facility impact
+
+**What remains:** Concentration is an inherent early-stage risk. There is currently no hard protocol limit on the maximum share of the loan book any single operator can represent.
+
+---
+
+## Regulatory and Legal Risk
+
+**The risk that regulatory changes affect the protocol's ability to operate.**
+
+Fleets operates across multiple jurisdictions — DeFi capital markets (global), Solana (US regulatory environment), and Nigerian vehicle lending (Nigerian financial regulation). Changes to any of these regulatory environments could affect the protocol's operations.
+
+**Mitigations:**
+- Fleet lending in Nigeria is conducted through a licensed SPV specifically structured for regulatory compliance
+- The SPV holds vehicle liens under Nigerian law, providing a legally enforceable recovery mechanism
+
+**What remains:** Regulatory risk cannot be fully eliminated. New DeFi regulations, changes to Nigerian lending law, or SPV licensing issues could constrain or halt protocol operations.
+
+---
+
+## Risk Summary
+
+| Risk | Primary Impact | Who Bears It First |
+|---|---|---|
+| Credit / default | Loan loss | FFC → Insurance Fund → FYC |
+| Liquidity | Redemption delay | All LPs (queue) |
+| Smart contract | Total loss | All LPs equally |
+| Oracle manipulation | Mispriced tokens | All LPs equally |
+| Yield-bearing token counterparty | Pool asset loss | All LPs equally |
+| FX / settlement | Increased default probability | FFC first |
+| Concentration | Amplified default impact | FFC → Insurance Fund → FYC |
+| Regulatory | Operational disruption | All LPs equally |
+
+<Note>
+  This page reflects risks as understood at the time of writing. The protocol is in private beta and parameters may change before public launch. Always do your own research.
+</Note>

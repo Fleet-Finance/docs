@@ -5,9 +5,12 @@
   "colors": {
     "primary": "#3B83F6",
     "light": "#3B83F6",
-    "dark": "#3B83F6"
+    "dark": "#183758"
   },
-  "favicon": "/favicon.svg",
+  "favicon": {
+    "light": "/favicon.svg",
+    "dark": "/favicon.svg"
+  },
   "navigation": {
     "tabs": [
       {
@@ -22,13 +25,39 @@
           {
             "group": "Background",
             "pages": [
-              "background/traditional-fleet-financing"
+              "background/traditional-fleet-financing",
+              "background/why-fleets"
             ]
           },
           {
             "group": "Protocol Overview",
             "pages": [
-              "protocol-overview/buy-stake"
+              "protocol-overview/how-it-works",
+              "protocol-overview/token-system",
+              "protocol-overview/capital-structure",
+              "protocol-overview/yield-model",
+              "protocol-overview/loan-mechanics",
+              "protocol-overview/buy-stake",
+              "protocol-overview/redemption"
+            ]
+          },
+          {
+            "group": "For Depositors",
+            "pages": [
+              "depositors/getting-started"
+            ]
+          },
+          {
+            "group": "For Borrowers",
+            "pages": [
+              "borrowers/operator-journey"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "resources/risks",
+              "resources/faq"
             ]
           }
         ]
@@ -63,6 +92,18 @@
       "x": "https://x.com/usefleets",
       "github": "https://github.com/Fleet-Finance",
       "discord": "https://discord.gg/NcVXCthTpd"
+    }
+  },
+  "background": {
+    "decoration": "grid"
+  },
+  "appearance": {
+    "default": "system"
+  },
+  "errors": {
+    "404": {
+      "title": "You can't park here!",
+      "description": "This page doesn't exist — try the navigation on the left."
     }
   }
 }

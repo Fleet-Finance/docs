@@ -1,0 +1,117 @@
+---
+title: "Token System"
+description: "FYC and FFC — two claims on the same pool, structured to separate risk from reward."
+---
+![FYC and FFC](/images/fyc-ffc.png)
+## Two Tokens, One Pool
+
+Fleets uses two investor tokens — FYC and FFC — that both represent claims on the **same shared pool**. There are no separate capital silos or sub-vaults. The distinction is economic, not structural: each token defines a different priority in how yield is distributed and how losses are absorbed.
+
+| Token | Full Name | Role | Yield | Loss Priority |
+|---|---|---|---|---|
+| **FYC** | Fleets Yield Coin | Senior tranche | Capped — sliding cap tied to deployment | Last to absorb losses |
+| **FFC** | Fleets FiLo Coin | Junior / first-loss tranche | Uncapped residual above FYC cap | First to absorb losses |
+
+## How Token Prices Work
+
+Both tokens use a **share-price model**. Users can mint new tokens at any point in time by depositing USDC, so supply grows dynamically as participation increases. As yield accumulates into each tranche's value, the price per token also rises.
+
+```
+P_FYC = V_FYC / S_FYC
+P_FFC = V_FFC / S_FFC
+```
+
+| Variable | Description |
+|---|---|
+| **P_FYC / P_FFC** | Current redemption value per token in USD |
+| **V_FYC / V_FFC** | Total economic value of the tranche at this moment |
+| **S_FYC / S_FFC** | Current token supply  |
+
+
+### Example
+
+Suppose at a given moment: `V_FYC = $1,200,000` and `S_FYC = 1,200,000 tokens` → `P_FYC = $1.0000`
+
+After 6 months of yield accretion: `V_FYC = $1,248,000`, supply is `1,200,000` → `P_FYC = $1.0400`
+
+A new depositor putting in ```$50,000``` receives: `$50,000 / $1.0400 = 48,077 FYC tokens` (new tokens are minted into the supply)
+
+If that depositor redeems 12 months later at `P_FYC = $1.1200`:
+`48,077 × $1.1200 = $53,846` — a gain of ```$3,846```.
+
+## Minting Tokens
+
+When you deposit USDC, the protocol:
+1. Checks the USDC oracle price (depeg protection — rejects if USDC trades below ```$0.995```)
+2. Swaps USDC for treasury-backed yield-bearing tokens via an on-chain DEX
+3. Mints FYC or FFC tokens at the **optimistic price** (which includes accrued but not yet distributed loan yield)
+4. Returns any yield-bearing token "dust" from swap slippage directly to the depositor
+
+Tokens minted are calculated as:
+
+```
+Tokens minted = Deposit Amount / P_optimistic
+```
+
+## Conservative vs Optimistic Price
+
+The protocol maintains two price readings for each tranche:
+
+<Columns cols={2}>
+  <Card title="Conservative Price" icon="shield-halved">
+    Based only on confirmed collected income. Used for **redemptions** and displayed in the UI at all times. More stable — excludes accrued but not yet received loan payments.
+
+    `P_conservative = V_tranche / S_tranche`
+  </Card>
+  <Card title="Optimistic Price" icon="chart-line">
+    Includes accrued but not yet received loan interest since the last repayment. Used internally for **minting (deposits)** only. Prevents dilution of existing holders.
+  </Card>
+</Columns>
+
+The optimistic price is calculated on-chain at the moment a user deposits.
+
+The accrued yield in the optimistic price refers specifically to **loan yield**: interest that has been earned based on time elapsed since the last repayment but has not yet been received from borrowers. Yield from treasury-backed yield-bearing tokens is already reflected in the pool value continuously and does not need to be separately estimated.
+
+## FYC — The Senior Tranche
+
+FYC is designed for depositors who prioritise predictable income and capital preservation.
+
+**Key characteristics:**
+- Yield is capped by a sliding rate that scales with the pool's base yield and deployment level
+- When the pool is fully deployed, FYC earns close to its full cap (typically 8–10%)
+- When no loans are active, both FYC and FFC earn the same base APY from treasury-backed yield-bearing token returns
+- FYC holders are the **last** to absorb credit losses — FFC and the Insurance Fund are exhausted first
+
+## FFC — The Junior Tranche
+
+FFC is designed for depositors who want maximum yield in exchange for taking first-loss risk.
+
+**Key characteristics:**
+- Yield is uncapped — FFC receives everything left over after the FYC cap is filled
+- At high deployment rates with high-APR loan books, FFC yields can significantly exceed FYC
+- FFC holders absorb all credit losses **first**, before any loss touches the Insurance Fund or FYC
+- The protocol enforces a hard coverage constraint: `V_FFC / Active Loans ≥ 80%` at all times
+
+<Warning>
+  FFC is a first-loss instrument. In a default scenario, FFC holders' token value may decline. Understand the [default waterfall](/protocol-overview/yield-model#default-waterfall) before depositing into FFC.
+</Warning>
+
+## The FFC Coverage Constraint
+
+This is the single most important safety rule in the protocol:
+
+```
+φ = V_FFC / Active Loans ≥ 0.80 (at all times)
+```
+
+The maximum the protocol can lend is:
+
+```
+L_max = V_FFC / 0.80
+```
+
+**Example:** If FFC tranche value =```$800,000```, the protocol can have at most```$1,000,000``` in active loans. This check runs before every new loan origination. If it would be breached, origination is blocked until FFC value grows or existing loans are repaid.
+
+<Note>
+  Continue to [Capital Structure](/protocol-overview/capital-structure) to understand how the pool's 80/20 split works in practice.
+</Note>

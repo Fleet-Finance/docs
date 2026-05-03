@@ -1,0 +1,126 @@
+---
+title: "Loan Mechanics"
+description: "How fleet operator loans are structured, calculated, and repaid — the math behind amortised vehicle financing."
+---
+
+## Loan Structure
+
+Every Fleets facility is a **fully amortising USD loan** secured by a vehicle lien held by the licensed Nigerian SPV. The operator contributes between 20% and 40% of the vehicle value as equity; the protocol funds the remainder. This results in a loan-to-value ratio of 60–80%.
+
+```
+Vehicle Cost = Operator Equity (20–40%) + Fleets Loan (60–80%)
+```
+
+At default, the only recoverable asset is the vehicle itself. There is no additional collateral.
+
+**Available loan terms:** 12, 24, or 36 months  
+**APR range:** 15–25%, fixed at drawdown
+
+## The Amortisation Formula
+
+Every loan uses the standard annuity (PMT) formula to compute a fixed monthly payment:
+
+```
+PMT = P × r / (1 − (1 + r)^(−n))
+```
+
+| Variable | Description |
+|---|---|
+| **PMT** | Fixed monthly payment — constant for the entire loan term |
+| **P** | Original principal (the Fleets loan amount) |
+| **r** | Monthly interest rate = APR / 12 |
+| **n** | Total monthly payments (loan term in months) |
+
+This is the same formula used by every bank, mortgage lender, and auto finance company worldwide.
+
+## How Interest and Principal Work
+
+Although the monthly payment is constant, the split between interest and principal shifts each month. Interest is calculated on the **remaining balance**, which decreases after every payment:
+
+```
+Interest_t   = Balance_(t-1) × r
+Principal_t  = PMT − Interest_t
+Balance_t    = Balance_(t-1) − Principal_t
+```
+
+For the protocol's pool accounting, loan income is modelled as a fixed monthly interest contribution. This ensures predictable pool growth forecasting across the loan term.
+
+## Worked Example: ```$80,000``` Loan at 22% APR, 36 Months
+
+```
+PMT = ($80,000 × 0.22/12) / (1 − (1 + 0.22/12)^−36)
+    = $1,466.67 / 0.48387
+    = $3,031.34 / month
+```
+
+| Month | Interest | Principal | Balance |
+|---|---|---|---|
+| 1 | ```$1,466.67``` | ```$1,564.67``` | ```$78,435.33``` |
+| 6 | ```$1,317.16``` | ```$1,714.18``` | ```$70,131.04``` |
+| 12 | ```$1,145.64``` | ```$1,885.70``` | ```$60,603.74``` |
+| 24 | ```$741.00``` | ```$2,290.34``` | ```$38,128.17``` |
+| 36 | ```$54.62``` | ```$2,976.72``` | ```$0.00``` |
+
+Total interest paid over 36 months: ```$29,128.24```
+
+## How Repayments Are Routed
+
+When a repayment arrives in the pool, the full payment is converted to yield-bearing tokens and enters the pool. The protocol accounts for the payment as follows:
+
+```
+Monthly Payment = Interest Portion + Principal Portion
+     │                   │
+     │                   └──► Reduces outstanding loan balance
+     │                        (tops up Liquidity Reserve first if below 20%)
+     └──► Flows through yield waterfall
+          ├── 10% → Protocol Treasury (minted as FYC)
+          ├──  5% → Insurance Fund (minted as FYC)
+          └── 85% → FYC and FFC holders (via sliding cap)
+```
+
+Only the interest portion increases pool value. The principal portion reduces the outstanding loan balance, returning that capital to the pool's yield-bearing token holdings.
+
+## Payment Schedule
+
+All payment due dates derive from `disbursement_ts` — the timestamp of the actual USDC transfer to the operator via the SPV:
+
+```
+Payment_due[n] = disbursement_ts + n × 2,592,000 seconds  (n = 1, 2, 3...)
+```
+
+This is important: `disbursement_ts` is the clock anchor for all payment dates, not the loan origination date.
+
+## Grace Period and Default
+
+If an operator misses a payment:
+
+| Day | State | Action |
+|---|---|---|
+| Day 1 | **Repayment due** | SPV expects repayment. USDC credited to pool by end of day. |
+| Day 2 | **Delinquent** | Grace period begins. Penalty interest starts accruing. SPV contacts operator. |
+| Days 2–30 | **Delinquent** | Penalty applies at APR × 1.25 on the outstanding balance |
+| Day 30, 23:59 | **Defaulted** | Automatic state transition. SPV executes vehicle lien. No exceptions. |
+| Day 31+ | **Recovery** | Default waterfall. See [Yield Model — Default Waterfall](/protocol-overview/yield-model#default-waterfall). |
+
+### Penalty Interest
+
+Penalty interest follows the same amortised structure as the regular loan, but with a 1.25x multiplier applied to the interest rate. This keeps penalties bounded — they cannot exceed the normal repayment amount scaled by 1.25.
+
+For a ```$50,000``` loan at 25% APR:
+
+```
+Penalty rate = 25% × 1.25 = 31.25%
+Monthly penalty interest = $50,000 × (31.25% / 12) ≈ $1,302
+```
+
+If an operator cures within the grace period, they owe their normal repayment plus the accrued penalty interest. If not cured, the vehicle lien is executed.
+
+Recovered penalty income — if any — is credited to the pool and benefits all LP token holders.
+
+<Info>
+  Multiple concurrent facilities can be active simultaneously. Total loan interest each period is the sum across all active loans. Each loan is tracked independently in its own on-chain account.
+</Info>
+
+<Note>
+  Ready to deposit? See [Getting Started](/depositors/getting-started) for a step-by-step depositor guide.
+</Note>

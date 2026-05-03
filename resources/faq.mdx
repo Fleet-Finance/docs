@@ -1,0 +1,76 @@
+---
+title: "FAQ"
+description: "Frequently asked questions about Fleets — the protocol, the tokens, and the risks."
+---
+
+<AccordionGroup>
+
+  <Accordion title="What is Fleets?">
+    Fleets is a structured credit protocol on Solana that connects DeFi capital to African corporate fleet operators. Depositors supply USDC and receive FYC or FFC tranche tokens that earn yield from vehicle acquisition loans and passive returns from treasury-backed yield-bearing tokens. Fleet operators receive USD-denominated credit facilities to purchase buses and commercial vehicles.
+  </Accordion>
+
+  <Accordion title="How is Fleets different from other RWA protocols?">
+    Most RWA protocols route capital into US Treasuries or tokenised real estate. Fleets routes capital into vehicle acquisition loans in Africa — an underserved credit market with higher loan APRs (15–25%) than typical RWA products. This higher gross yield supports strong net returns for depositors after protocol fees. The yield is also structurally uncorrelated with crypto market cycles.
+  </Accordion>
+
+  <Accordion title="What is the difference between FYC and FFC?">
+    Both tokens are claims on the same shared pool. FYC (senior) receives yield first each epoch up to a sliding cap and is the last to absorb any credit losses. FFC (junior) receives residual yield above the FYC cap — potentially much higher returns — but is the first to absorb losses if a loan defaults. FYC is lower risk; FFC is higher risk, higher reward.
+  </Accordion>
+
+  <Accordion title="How is yield generated?">
+    Yield comes from two sources: (1) monthly loan repayments from fleet operators at 15–25% APR, and (2) continuous price appreciation of treasury-backed yield-bearing tokens held in the pool. The yield-bearing token returns are already reflected in the pool value in real time. Even when no loans are active, all capital in the pool earns this baseline yield. Loan income adds on top of the baseline when the pool is deployed.
+  </Accordion>
+
+  <Accordion title="Why does Fleets hold treasury-backed yield-bearing tokens?">
+    Rather than holding idle USDC, Fleets converts all pool capital to treasury-backed yield-bearing tokens whose price continuously rises as the underlying yield is reflected through an increasing exchange rate. This means every dollar in the pool — whether deployed in loans or sitting in the liquidity reserve — is always earning yield. The protocol stores only the token quantity on-chain and computes USD value live from the oracle.
+  </Accordion>
+
+  <Accordion title="What happens when I deposit?">
+    When you deposit USDC, the protocol checks the USDC/USD oracle price (rejecting if USDC is below ```$0.995```), swaps your USDC to yield-bearing tokens via an on-chain DEX, and mints FYC or FFC tokens to your wallet at the current optimistic tranche price. Any swap slippage above your tolerance is returned as yield-bearing token dust. The entire process is a single on-chain transaction.
+  </Accordion>
+
+  <Accordion title="How do I earn yield? Do I need to stake or claim?">
+    No additional steps are needed. FYC and FFC use a share-price model: yield accumulates directly into the token price. Your token balance grows as you mint new tokens with each deposit; the USD value of each token rises as yield accretes. When you redeem, you receive USDC at the current conservative token price — which reflects all yield earned during your holding period.
+  </Accordion>
+
+  <Accordion title="What are the redemption options?">
+    There are two options. **Scheduled Redemption** joins a queue (30 days for FYC, 90 days for FFC) and carries no fee. Your tokens keep accruing yield while you wait. **Accelerated Redemption** is immediate and carries a small dynamic fee: 0.10–0.50% for FYC, 0.50–1.00% for FFC. The fee is lower when the pool has more undeployed capital. Both methods settle at the conservative token price. Accelerated redemption fees are split 50% to the protocol treasury and 50% to the Insurance Fund.
+  </Accordion>
+
+  <Accordion title="Can I lose money?">
+    Yes — particularly in the FFC tranche. If a fleet operator defaults and the vehicle auction recovery is insufficient, losses flow first to FFC holders, then to the Insurance Fund (which burns FYC tokens to stabilise FYC price), and only as a final backstop to FYC holders. FYC holders have multiple layers of protection before their capital is at risk, but smart contract risk and extreme loss scenarios always exist in DeFi. Never deposit more than you can afford to lose.
+  </Accordion>
+
+  <Accordion title="What protects FYC holders from losses?">
+    Two layers: (1) The FFC junior tranche absorbs losses first. (2) The Insurance Fund, funded by 5% of every epoch's yield and minted as FYC, acts as the second line of defence — FYC tokens in the insurance wallet are burned to stabilise the FYC price. The FFC coverage constraint (φ ≥ 80%) ensures the FFC tranche is always large enough relative to the loan book to absorb a significant loss before the Insurance Fund is touched. Only if both the FFC tranche and the Insurance Fund are fully exhausted would FYC holders face a loss.
+  </Accordion>
+
+  <Accordion title="What happens if a borrower misses a payment?">
+    A 30-day grace period begins immediately. Penalty interest accrues at APR × 1.25. The SPV contacts the operator to remedy the shortfall. If not resolved by Day 30, the loan is automatically declared defaulted, and the SPV executes the vehicle lien — the vehicles are seized and sold at auction. Recovery proceeds are returned to the pool and flow through the default waterfall.
+  </Accordion>
+
+  <Accordion title="What is the FFC coverage constraint?">
+    The protocol requires that the FFC tranche value always covers at least 80% of the outstanding loan book: `V_FFC / Active Loans ≥ 0.80`. This is a hard protocol invariant enforced at the smart contract level. If a new loan origination would breach this ratio, it is blocked. If an FFC redemption would breach it, the redemption is capped.
+  </Accordion>
+
+  <Accordion title="What APY can I expect when no loans are active?">
+    When no loans are active, both FYC and FFC earn the same base APY from treasury-backed yield-bearing token returns. After the 15% fee and Insurance Fund allocation, this is approximately 2.5% APY at current base yield rates. When loans become active, FYC and FFC returns diverge based on the sliding cap mechanism.
+  </Accordion>
+
+  <Accordion title="Who are the borrowers?">
+    Established Nigerian corporate fleet operators — companies with documented operational history operating buses, vans, or coaches for public transport, employer shuttle services, or logistics. An example is Shuttlers, which has provided employer shuttle services in Lagos for over a decade. All borrowers are vetted by the licensed Nigerian SPV through a credit assessment process before any capital is disbursed.
+  </Accordion>
+
+  <Accordion title="How is the protocol operated on-chain?">
+    Fleets is built on Solana using the Anchor framework. All pool state, tranche values, loan balances, and redemption queues are stored in program-derived accounts (PDAs) that are transparent and auditable on-chain.
+  </Accordion>
+
+  <Accordion title="Is Fleets audited?">
+    Fleets is currently in private beta. Audit status will be announced before public launch. The protocol's security model is described in the technical specification.
+  </Accordion>
+
+  <Accordion title="How do I join?">
+    Fleets is in private beta. Join the waitlist at [usefleet.xyz](https://usefleet.xyz) or contact the team at [contact@usefleet.com](mailto:contact@usefleet.com).
+  </Accordion>
+
+</AccordionGroup>

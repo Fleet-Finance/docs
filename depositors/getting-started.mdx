@@ -1,0 +1,127 @@
+---
+title: "Getting Started"
+description: "Everything you need to deposit into Fleets and start earning real-world yield — from wallet setup to your first FYC or FFC position."
+---
+
+## What You Need
+
+- A Solana-compatible wallet (Phantom, Backpack, or Solflare recommended)
+- USDC on the Solana network
+- A small amount of SOL for transaction fees
+
+<Info>
+  Fleets is currently in **private beta**. Access requires a waitlist invitation. Join at [usefleet.xyz](https://usefleet.xyz).
+</Info>
+
+## Step 1 — Understand Your Options
+
+Before depositing, decide between the two tranche tokens:
+
+<Columns cols={2}>
+  <Card title="FYC — Senior Tranche" icon="shield">
+    **Lower risk. Capped but predictable yield.**
+
+    - Receives yield first each epoch up to the sliding cap
+    - Last to absorb any credit losses
+    - Token price accretes steadily over time
+    - Best for depositors who want stable, real-world income
+  </Card>
+  <Card title="FFC — Junior Tranche" icon="bolt">
+    **Higher risk. Uncapped residual yield.**
+
+    - Receives all yield above the FYC cap
+    - First to absorb credit losses
+    - Token price more volatile — high upside, real downside
+    - Best for depositors who want maximised returns and accept first-loss exposure
+  </Card>
+</Columns>
+
+## Step 2 — Connect and Deposit
+
+<Steps>
+  <Step title="Connect Your Wallet">
+    Go to the Fleets app and click **Connect Wallet**. Approve the connection request in your wallet.
+  </Step>
+  <Step title="Navigate to Deposit">
+    Select **Deposit** from the navigation. Choose either the **FYC** or **FFC** tab.
+  </Step>
+  <Step title="Enter Amount">
+    Enter the USDC amount you wish to deposit. The UI will show you:
+    - Current token price (conservative)
+    - Estimated tokens to receive
+    - Current pool APY for each tranche
+  </Step>
+  <Step title="Review and Confirm">
+    Review your slippage setting (default 0.5%) and confirm the transaction. Your wallet will prompt for approval.
+  </Step>
+  <Step title="Receive Tokens">
+    FYC or FFC tokens appear in your wallet within seconds of the transaction confirming on Solana.
+  </Step>
+</Steps>
+
+## Step 3 — Monitor Your Position
+
+After depositing, your position value grows automatically as yield accretes into the token price. You do not need to stake, claim, or compound — the share-price model handles this.
+
+In the Fleets app you can track:
+
+| Metric | Description |
+|---|---|
+| **Token Balance** | Your FYC or FFC token count |
+| **Token Price** | Current conservative price (confirmed income only) |
+| **Position Value** | Token Balance × Current Price |
+| **Estimated APY** | Trailing 30-day annualised yield rate |
+| **Pool Deployment Rate** | % of Loan Allocation currently in active facilities |
+
+## Step 4 — Exiting Your Position
+
+When you're ready to exit, choose your redemption method:
+
+<Columns cols={2}>
+  <Card title="Scheduled Redemption" icon="calendar">
+    **No fee.** Join the queue and receive USDC at the conservative price when processed.
+
+    - FYC: up to 30 days
+    - FFC: up to 90 days
+
+    Your tokens continue earning during the wait.
+  </Card>
+  <Card title="Accelerated Redemption" icon="bolt">
+    **Small dynamic fee (0.10–0.50% for FYC, 0.50–1.00% for FFC).** Immediate USDC at the conservative price.
+
+    Fee varies based on how large your redemption is relative to available liquidity.
+  </Card>
+</Columns>
+
+See [Redemption](/protocol-overview/redemption) for full details on fees and the liquidity floor.
+
+## Key Risks to Understand
+
+<Warning>
+  **FFC first-loss risk:** FFC holders absorb credit losses before the Insurance Fund and FYC. In a significant default scenario, FFC token price can decline.
+
+  **Smart contract risk:** Fleets is a new protocol.
+
+  **Liquidity risk:** Redemptions are always available, but large simultaneous redemptions may be queued. New loan origination is blocked when the Liquidity Reserve falls below 20%.
+
+  **Yield-bearing token risk:** All pool capital is held in treasury-backed yield-bearing tokens. While extremely low risk, an issue with the underlying asset would affect all pool assets.
+</Warning>
+
+## APY Expectations
+
+The ranges below reflect outcomes based on the protocol’s minimum and maximum loan APR assumptions (15% - 25%) over a 3-year duration. Values assume a 50:50 FYC to FFC split and incorporate both yield-bearing token yield and loan income.
+
+| Scenario | FYC APY | FFC APY |
+|---|---|---|
+| No active loans | ~2.9% | ~2.9% |
+| 50% deployment  | ~4–7% | ~6–11% |
+| 75% deployment  | ~5–8% | ~8–16% |
+| 100% deployment  | ~6–10% (cap bound) | ~12–25%+ |
+
+When no loans are active, both FYC and FFC earn the same base yield from treasury-backed yield-bearing token returns (net of fees). Loan yield adds on top of this baseline when the pool is deployed.
+
+These are protocol design estimates. Actual APY depends on loan utilisation, blended APR, base yield rates, and default experience.
+
+<Note>
+  Questions? Read the [FAQ](/resources/faq) or reach out at [contact@usefleet.com](mailto:contact@usefleet.com).
+</Note>

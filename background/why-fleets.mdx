@@ -1,0 +1,56 @@
+---
+title: "Why Fleets?"
+description: "Real-world yield, uncorrelated to crypto — how Fleets connects DeFi capital to income-producing transportation assets."
+---
+
+## A Different Kind of Yield
+
+Most DeFi yields are circular. They come from trading fees, token emissions, or leverage between crypto assets — all of which move with crypto markets. When markets fall, yields compress or vanish entirely.
+
+Fleets generates yield from a completely different source: the fixed monthly repayments made by African fleet operators on their vehicle loans. These repayments are driven by daily transportation demand — commuters taking buses to work, goods moving between cities, employers shuttling their staff. None of that stops because Bitcoin dropped 30%.
+
+This structural independence from crypto market cycles is the core thesis behind Fleets.
+
+## What Fleets Does
+
+Fleets is a structured credit protocol on Solana. It raises USDC from DeFi depositors, converts it to treasury-backed yield-bearing tokens that earn ~3–5% APY passively, and deploys 80% of that capital as vehicle acquisition loans to vetted African corporate fleet operators at a competitive APR.
+
+The protocol is designed so that **no capital sits idle**. The 20% held back as a liquidity buffer earns yield continuously. The 80% deployed to loans earns loan interest on top of that.
+
+## The Two Sides of the Protocol
+
+<Columns cols={2}>
+  <Card title="For Fleet Operators" icon="bus">
+    Access credit facilities secured by vehicle liens. Repay over 12–36 months on amortising schedules aligned to fleet cashflows. No collateral beyond the vehicles.
+  </Card>
+  <Card title="For Depositors" icon="coins">
+    Earn real-economy yield from loan repayments and reserve passive accrual. Choose between a senior fixed-yield tranche (FYC) or a higher-yield, first-loss junior tranche (FFC).
+  </Card>
+</Columns>
+
+## Why the Yield Is Real
+
+Every dollar of loan income recognised by the protocol corresponds to a repayment that has landed back in the pool. The protocol uses **cash-basis recognition** — income is booked only when USDC is received in the pool, not when it is due and not when the SPV acknowledges it.
+
+The baseline yield adds a second layer: even if no loans were active, depositors would still earn ~3–5% APY from the continuous price appreciation. Loan income sits on top of that baseline.
+
+## Why the Risk Is Managed
+
+Fleets uses a structured two-tranche model to allocate risk transparently:
+
+- **FYC (senior)** — receives yield first, up to a capped rate. Last to absorb any credit losses.
+- **FFC (junior)** — absorbs first-loss risk in exchange for the residual (uncapped) yield above the FYC cap.
+
+The protocol enforces a hard coverage constraint: the junior tranche must always cover at least **80% of the outstanding loan book**. This means the senior tranche cannot be threatened unless losses exceed the junior buffer. New loans are blocked from originating if this ratio would be breached.
+
+Additionally, all active loans are secured by vehicle liens enforced by the SPV. Defaulting operators face asset seizure and liquidation within a defined recovery window.
+
+## Why Solana
+
+Fleets is built on Solana because its sub-second finality and sub-cent transaction fees make it practical to run monthly repayment routing, yield epoch distributions, and real-time tranche price updates — without the gas costs that would erode yields on Ethereum-based protocols.
+
+All protocol state — pool accounting, tranche values, loan balances, redemption queues — is stored transparently on-chain in program-derived accounts (PDAs), auditable by anyone at any time.
+
+<Info>
+  Fleets is currently in private beta. Protocol parameters, APY ranges, and tranche structures described in this documentation reflect the design specification and are subject to adjustment before public launch.
+</Info>

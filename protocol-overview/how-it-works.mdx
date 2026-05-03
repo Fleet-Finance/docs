@@ -1,0 +1,116 @@
+---
+title: "How It Works"
+description: "A complete picture of the Fleets protocol — from USDC deposit to real-world loan and back to yield."
+---
+
+## The Shared Pool
+
+At the heart of Fleets is a single shared pool. All depositor capital — regardless of which tranche token a depositor mints — flows into one unified pool held in treasury-backed yield-bearing tokens that appreciate continuously through passive yield.
+
+The total value of this pool at any moment is:
+
+```
+V_pool = C + OP
+```
+
+| Variable | Description |
+|---|---|
+| **C** | Reserve holdings — current value of all yield-bearing tokens held on-chain, growing continuously via price appreciation |
+| **OP** | Outstanding principal — sum of all active loan balances, updated with every repayment and reduced to zero when a loan closes |
+
+Credit losses are absorbed directly through tranche accounting: when a default occurs, FFC's value is reduced first, and insurance tokens are burned if needed. Any recovery proceeds are included in C, and the defaulted loan is removed from OP.
+
+Because treasury-backed yield-bearing tokens accrete value every second even when no loans are active, **V_pool grows passively at all times** — not only when repayments arrive.
+
+## Capital Structure: The 80/20 Split
+
+<Columns cols={2}>
+  <Card title="Liquidity Reserve (20%)" icon="shield-halved">
+    Always held in yield-bearing tokens on-chain. Ring-fenced for LP redemptions. Never allocated to fleet loans. Earns yield continuously. New loan origination is blocked when the reserve falls below this floor.
+  </Card>
+  <Card title="Loan Allocation (80%)" icon="arrow-up-right-dots">
+    Available for deployment as vehicle acquisition loans to fleet operators. Undeployed portions remain in reserve wallet earning passive yield.
+  </Card>
+</Columns>
+
+This structure ensures that even at 100% loan deployment, 20% of the pool remains available for redemptions — while operators get access to the remaining capital.
+
+## The Two Tranches
+
+Depositors choose between two tranche tokens that represent different economic claims on the same shared pool:
+
+<Columns cols={2}>
+  <Card title="FYC — Fleets Yield Coin" icon="shield" href="/protocol-overview/token-system">
+    **Senior tranche.** Receives yield first, up to a sliding cap tied to deployment rate. Last to absorb any credit losses. Designed for risk-averse depositors seeking predictable income.
+  </Card>
+  <Card title="FFC — Fleets FiLo Coin" icon="bolt" href="/protocol-overview/token-system">
+    **Junior tranche.** Absorbs first-loss risk in exchange for the residual uncapped yield above the FYC cap. Designed for risk-tolerant depositors seeking maximised returns.
+  </Card>
+</Columns>
+
+Both use a **share-price model**: users can mint new tokens at any time by depositing USDC. As yield accumulates into each tranche's value, the price per token rises. When a user redeems, they burn their tranche tokens and receive the corresponding value in USDC based on the current share price.
+
+## The Loan Lifecycle
+
+<Steps>
+  <Step title="Operator Applies">
+    A corporate fleet operator applies for a vehicle acquisition facility. The SPV evaluates the operator's fleet, cashflow history, and vehicle lien eligibility.
+  </Step>
+  <Step title="Facility Origination">
+    The protocol checks the FFC coverage constraint (FFC value must cover ≥ 80% of active loans) and verifies that the liquidity reserve is above 20%. If both checks pass, capital is disbursed from the Loan Allocation via the licensed Nigerian SPV.
+  </Step>
+  <Step title="Monthly Repayments">
+    The operator repays a fixed monthly amount for the term of the loan (12, 24, or 36 months). Each full repayment is routed into the pool. Only the interest portion of each payment increases pool value; the principal portion reduces the outstanding loan balance.
+  </Step>
+  <Step title="Yield Distribution">
+    Yield-bearing token returns accrue into pool value every second. The LP share of this growth is already embedded in the pool value — no separate distribution is needed. Distribution epochs (typically every 2–3 days) are the on-chain event that mints the accumulated protocol fee (10%) and insurance fund (5%) as new FYC tokens. This is the only thing epochs do for yield-bearing token returns.
+
+    Loan interest is different: the moment a borrower repayment lands in the pool, the interest portion is split and credited immediately — 10% minted as FYC for the protocol treasury, 5% minted as FYC for the insurance fund, and 85% credited to FYC and FFC holders via the sliding cap. No epoch is involved.
+  </Step>
+  <Step title="Loan Repaid">
+    When the final payment is made, the loan balance reaches zero, the facility closes, and the full principal is back in the Undeployed Capital bucket earning passive yield.
+  </Step>
+</Steps>
+
+## What Happens on Default
+
+If an operator misses a repayment, a 30-day **grace period** begins. During this window:
+- Penalty interest applies at **APR × 1.25**
+- The SPV contacts the operator to remedy the shortfall
+
+If the default is not resolved by Day 30, the SPV executes the vehicle lien: the vehicles are seized and sold at auction. Recovered funds are returned to the pool. Remaining losses are absorbed first by the **FFC holders**, then by the **Insurance Fund** (which burns FYC tokens to stabilise the FYC price), and only as a final backstop by **FYC holders** if both are fully exhausted.
+
+<Note>
+  The FFC coverage invariant (φ ≥ 80%) is enforced on every loan origination. This means FYC holders cannot be at risk unless total credit losses exceed the entire FFC junior tranche and Insurance Fund — a structural safeguard built into the protocol at the contract level.
+</Note>
+
+## The Full Picture
+
+```
+USDC deposit
+     │
+     ▼
+USDC → Treasury-backed yield-bearing tokens (via Jupiter/Titan)
+     │
+     ▼
+Shared Pool (V_pool = C + OP)
+     ├── 20% Liquidity Reserve ──► token price rises every second (LP value grows automatically)
+     └── 80% Loan Allocation
+              ├── Active Loan Book ──► Fleet operators
+              │        │
+              │        └── On repayment: interest split immediately
+              │                 ├── 10% → Treasury (FYC mint)
+              │                 ├──  5% → Insurance Fund (FYC mint)
+              │                 └── 85% → FYC / FFC via sliding cap
+              │
+              └── Undeployed Capital ──► token price rises every second (LP value grows automatically)
+                                              │
+                                              ▼
+                                 Epoch (every 2–3 days): mint accumulated
+                                 fee and insurance as FYC only
+                                 (85% LP share already in pool value — no action needed)
+```
+
+<Note>
+  Next: understand the [Token System](/protocol-overview/token-system) in detail, or jump straight to [Depositing](/depositors/getting-started).
+</Note>

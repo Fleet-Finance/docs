@@ -1,0 +1,123 @@
+---
+title: "Operator Journey"
+description: "How African fleet operators access Fleets financing — from eligibility to drawdown to final repayment."
+---
+
+## Who Can Borrow?
+
+Fleets targets **established corporate fleet operators** in Africa — companies with a documented history of operating transportation assets and generating consistent cashflows.
+
+Ideal applicants:
+- Registered Nigerian corporate entities (other markets planned)
+- Operate a fleet of commercial vehicles (buses, vans, coaches)
+- Have a track record of at least 12 months of operating revenue
+- Seeking to acquire new vehicles or refinance existing acquisition costs
+- Willing to grant a vehicle lien on financed assets
+
+<Info>
+  All facilities are disbursed in USD via the licensed Nigerian SPV. Operators manage their repayments through the SPV, which handles NGN/USD conversion on the operator's behalf.
+</Info>
+
+## Loan Parameters
+
+| Parameter | Specification |
+|---|---|
+| **Facility size** | Typically ```$50,000+``` per facility |
+| **LTV** | 60–80% — operator contributes 20–40% equity |
+| **APR** | 15–25%, fixed at drawdown |
+| **Term** | 12, 24, or 36 months |
+| **Repayment** | Fully amortising — equal monthly payments |
+| **Collateral** | Vehicle lien held by SPV |
+| **Currency** | USD (disbursement and repayment) |
+| **Grace period** | 30 days after missed repayment |
+
+## The Operator Journey
+
+<Steps>
+  <Step title="Initial Application">
+    Submit an application through the Fleets platform or directly via the SPV. Provide:
+    - Company registration documents
+    - 12 months of bank statements
+    - Fleet asset schedule (current vehicles, usage, revenue)
+    - Vehicle(s) to be financed (make, model, year, estimated value)
+  </Step>
+  <Step title="SPV Due Diligence">
+    The licensed Nigerian SPV conducts credit assessment, including:
+    - Fleet cashflow analysis
+    - Vehicle lien registration feasibility
+    - Operator identity verification
+    - Business operations review
+  </Step>
+  <Step title="Offer and Terms">
+    Eligible operators receive a facility offer specifying:
+    - Principal amount (60–80% of vehicle purchase price)
+    - Fixed APR for the facility term
+    - Monthly payment amount (PMT)
+    - Repayment schedule starting from disbursement date
+  </Step>
+  <Step title="Protocol Origination Check">
+    Before capital is disbursed, the smart contract verifies:
+    - Proposed facility does not breach the FFC coverage ratio (φ ≥ 80%)
+    - Liquidity Reserve is above 20% of pool NAV
+    - Protocol is not paused
+
+    If all checks pass, the loan account is created on-chain.
+  </Step>
+  <Step title="Disbursement">
+    USDC is transferred from the protocol pool to the SPV. The SPV converts to NGN and purchases the vehicle(s) alongside the operator's equity contribution. Vehicle liens are registered.
+
+    The `disbursement_ts` timestamp is recorded on-chain — all subsequent payment dates derive from this.
+  </Step>
+  <Step title="Monthly Repayments">
+    Each month, the operator repays a fixed amount to the SPV in NGN. The SPV converts to USDC and credits the protocol pool. The full payment enters the pool and is accounted for as:
+    - Interest portion: flows through the yield waterfall (10% treasury, 5% Insurance Fund, 85% to FYC/FFC)
+    - Principal portion: reduces the outstanding loan balance
+  </Step>
+  <Step title="Loan Closure">
+    On the final payment, the loan balance reaches zero, the facility status updates to Repaid, and the vehicle lien is released. The operator owns the vehicles outright.
+  </Step>
+</Steps>
+
+## Amortisation — What Operators Pay
+
+Every Fleets loan uses standard equal-payment amortisation. This means your monthly payment is **fixed for the entire loan term** — no balloon payments, no variable rates.
+
+**Example: ```$100,000``` vehicle acquisition at 25% APR over 36 months**
+
+```
+Monthly payment = PMT = $100,000 × (0.25/12) / (1 − (1 + 0.25/12)^−36)
+               = $3,974.98 / month
+```
+
+| Month | Payment | Interest | Principal | Balance |
+|---|---|---|---|---|
+| 1 | ```$3,975``` | ```$2,083``` | ```$1,892``` | ```$98,108``` |
+| 12 | ```$3,975``` | ```$1,756``` | ```$2,219``` | ```$82,847``` |
+| 24 | ```$3,975``` | ```$1,181``` | ```$2,794``` | ```$54,924``` |
+| 36 | ```$3,975``` | ```$81``` | ```$3,894``` | ```$0``` |
+
+Your total cost of borrowing over 36 months is approximately ```$43,099``` in interest on a ```$100,000``` loan.
+
+## What Happens if You Miss a Payment
+
+If a payment is not received by the due date, the grace period begins immediately:
+
+1. **Day 2:** Penalty interest begins accruing at **APR × 1.25**
+2. **Days 2–30:** SPV contacts operator to arrange remedy. Operator must pay overdue amount plus accrued penalty interest.
+3. **Day 30, 23:59:** If not resolved, automatic default is declared. SPV executes vehicle lien — assets are seized and sold at auction.
+
+In cases of mismanagement, the operator is expected to repay the outstanding principal. The protocol enforces a 30-day grace period at the contract level to protect depositor capital.
+
+## SPV and Legal Structure
+
+Fleets operates through a licensed Nigerian Special Purpose Vehicle (SPV) that:
+- Holds all vehicle liens on behalf of the protocol
+- Manages NGN/USD conversion for disbursements and repayments
+- Executes enforcement actions (vehicle seizure, auction) on default
+- Provides regulatory cover for USD lending activities in Nigeria
+
+The SPV structure means operators transact with a licensed Nigerian entity — not directly with a DeFi protocol. This ensures compliance with local financial regulations.
+
+<Note>
+  To start an application, reach out at [contact@usefleet.com](mailto:contact@usefleet.com) or visit [usefleet.xyz](https://usefleet.xyz).
+</Note>
